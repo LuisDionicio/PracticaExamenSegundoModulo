@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista Circular Doble - Productos</title>
+</head>
+<body>
+
+  <h1>Lista Circular Doble - Productos</h1>
+
+  <form id="formProducto">
+    <label>Código:</label><br>
+    <input type="text" id="codigo" required><br><br>
+
+    <label>Nombre:</label><br>
+    <input type="text" id="nombre" required><br><br>
+
+    <label>Precio:</label><br>
+    <input type="text" id="precio" required><br><br>
+
+    <label>Stock:</label><br>
+    <input type="text" id="stock" required><br><br>
+
+    <button type="button" onclick="agregarInicio()">Agregar al inicio</button>
+    <button type="button" onclick="agregarFinal()">Agregar al final</button>
+    <button type="button" onclick="eliminarInicio()">Eliminar inicio</button>
+    <button type="button" onclick="eliminarFinal()">Eliminar final</button>
+  </form>
+
+  <br><br>
+
+  <div>
+    <button onclick="inicio()">|<</button>
+    <button onclick="primero()"><</button>
+    <button onclick="final()">></button>
+    <button onclick="ultimo()">>|</button>
+  </div>
+
+
+
+ 
+  <h2>Lista de productos</h2>
+  <table border="1" id="tabla">
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Nombre</th>
+        <th>Precio</th>
+        <th>Stock</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    class Producto {
+      constructor(codiprod = "", nombprod = "", precprod = "", stocprod = "") {
+        this.codiprod = codiprod;
+        this.nombprod = nombprod;
+        this.precprod = precprod;
+        this.stocprod = stocprod;
+      }
+    }
+
+    class Nodo {
+      constructor(producto) {
+        this.producto = producto;
+        this.sig = null;
+        this.ant = null;
+      }
+    }
+
+    class ListaCircularDoble {
+      constructor() {
+        this.inicio = null;
+      }
+
+      agregarInicio(producto) {
+        const nuevo = new Nodo(producto);
+        if (!this.inicio) {
+          nuevo.sig = nuevo;
+          nuevo.ant = nuevo;
+          this.inicio = nuevo;
+        } else {
+          const ultimo = this.inicio.ant;
+          nuevo.sig = this.inicio;
+          nuevo.ant = ultimo;
+          ultimo.sig = nuevo;
+          this.inicio.ant = nuevo;
+          this.inicio = nuevo;
+        }
+      }
+
+      agregarFinal(producto) {
+        const nuevo = new Nodo(producto);
+        if (!this.inicio) {
+          nuevo.sig = nuevo;
+          nuevo.ant = nuevo;
+          this.inicio = nuevo;
+        } else {
+          const ultimo = this.inicio.ant;
+          nuevo.sig = this.inicio;
+          nuevo.ant = ultimo;
+          ultimo.sig = nuevo;
+          this.inicio.ant = nuevo;
+        }
+      }
+
+      eliminarInicio() {
+        if (!this.inicio) return;
+        const ultimo = this.inicio.ant;
+        if (this.inicio === ultimo) {
+          this.inicio = null;
+        } else {
+          this.inicio = this.inicio.sig;
+          this.inicio.ant = ultimo;
+          ultimo.sig = this.inicio;
+        }
+      }
+
+      eliminarFinal() {
+        if (!this.inicio) return;
+        const ultimo = this.inicio.ant;
+        if (this.inicio === ultimo) {
+          this.inicio = null;
+        } else {
+          const penultimo = ultimo.ant;
+          penultimo.sig = this.inicio;
+          this.inicio.ant = penultimo;
+        }
+      }
+
+      obtenerLista() {
+        const productos = [];
+        if (!this.inicio) return productos;
+        let aux = this.inicio;
+        do {
+          productos.push(aux.producto);
+          aux = aux.sig;
+        } while (aux !== this.inicio);
+        return productos;
+      }
+    }
+
+    const lista = new ListaCircularDoble();
+    let actual = null;
+
+    function obtenerDatos() {
+      const cod = document.getElementById("codigo").value;
+      const nom = document.getElementById("nombre").value;
+      const pre = document.getElementById("precio").value;
+      const sto = document.getElementById("stock").value;
+      return new Producto(cod, nom, pre, sto);
+    }
+
+    function mostrarNodo(nodo) {
+      if (!nodo) return;
+      document.getElementById("codigo").value = nodo.producto.codiprod;
+      document.getElementById("nombre").value = nodo.producto.nombprod;
+      document.getElementById("precio").value = nodo.producto.precprod;
+      document.getElementById("stock").value = nodo.producto.stocprod;
+    }
+
+    function limpiarCampos() {
+      document.getElementById("formProducto").reset();
+    }
+
+    function actualizarTabla() {
+      const cuerpo = document.querySelector("#tabla tbody");
+      cuerpo.innerHTML = "";
+      const productos = lista.obtenerLista();
+
+      productos.forEach(p => {
+        const fila = `<tr>
+          <td>${p.codiprod}</td>
+          <td>${p.nombprod}</td>
+          <td>${p.precprod}</td>
+          <td>${p.stocprod}</td>
+        </tr>`;
+        cuerpo.innerHTML += fila;
+      });
+    }
+
+    function agregarInicio() {
+      const producto = obtenerDatos();
+      lista.agregarInicio(producto);
+      actual = lista.inicio;
+      limpiarCampos();
+      actualizarTabla();
+    }
+
+    function agregarFinal() {
+      const producto = obtenerDatos();
+      lista.agregarFinal(producto);
+      if (!actual) actual = lista.inicio;
+      limpiarCampos();
+      actualizarTabla();
+    }
+
+    function eliminarInicio() {
+      lista.eliminarInicio();
+      actual = lista.inicio;
+      actualizarTabla();
+    }
+
+    function eliminarFinal() {
+      lista.eliminarFinal();
+      actual = lista.inicio;
+      actualizarTabla();
+    }
+
+    function inicio() { 
+      if (lista.inicio) {
+        actual = lista.inicio;
+        mostrarNodo(actual);
+      }
+    }
+
+    function ultimo() {
+      if (lista.inicio) {
+        actual = lista.inicio.ant;
+        mostrarNodo(actual);
+      }
+    }
+
+    function final() { 
+      if (actual && actual.sig) {
+        actual = actual.sig;
+        mostrarNodo(actual);
+      }
+    }
+
+    function primero() { 
+      if (actual && actual.ant) {
+        actual = actual.ant;
+        mostrarNodo(actual);
+      }
+    }
+  </script>
+
+</body>
+</html>
