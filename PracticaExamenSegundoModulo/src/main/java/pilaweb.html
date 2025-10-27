@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pila JS</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        class Pila {
+            constructor() {
+                this.items = [];
+            }
+
+            // Apilar un elemento
+            apilar(elemento) {
+                this.items.push(elemento);
+                this.mostrarVentana(); // mostrar en ventana
+            }
+
+            // Desapilar un elemento
+            desapilar() {
+                if(this.estaVacia()) {
+                    alert("La pila está vacía");
+                    return null;
+                }
+                const eliminado = this.items.pop();
+                this.mostrarVentana(); // actualizar ventana
+                return eliminado;
+            }
+
+            // Mostrar el tope de la pila
+            mostrarTope() {
+                if(this.estaVacia()) {
+                    alert("La pila está vacía");
+                    return null;
+                }
+                const tope = this.items[this.items.length - 1];
+                alert(`Tope de la pila:\nCodigo: ${tope.codigo}\nNombre: ${tope.nombre}\nF.Naci: ${tope.fnaci}`);
+                return tope;
+            }
+
+            // Verificar si está vacía
+            estaVacia() {
+                return this.items.length === 0;
+            }
+
+            // Mostrar la pila en ventana aparte
+            mostrarVentana() {
+                if(!this.ventana || this.ventana.closed) {
+                    this.ventana = window.open("", "VentanaPila", "width=400,height=400");
+                    this.ventana.document.write("<h2>Pila de Elementos</h2><ul id='listaPila'></ul>");
+                }
+
+                const lista = this.ventana.document.getElementById("listaPila");
+                lista.innerHTML = ""; // limpiar lista
+                // Mostrar desde el tope hacia abajo
+                for(let i = this.items.length - 1; i >= 0; i--) {
+                    const li = this.ventana.document.createElement("li");
+                    li.textContent = `${this.items.length - i}. Codigo: ${this.items[i].codigo}, Nombre: ${this.items[i].nombre}, F.Naci: ${this.items[i].fnaci}`;
+                    lista.appendChild(li);
+                }
+            }
+        }
+
+        const miPila = new Pila();
+
+        function apilarElemento(event) {
+            event.preventDefault();
+            const codigo = document.getElementById("txtCodigo").value;
+            const nombre = document.getElementById("txtNombre").value;
+            const fnaci = document.getElementById("txtFNaci").value;
+
+            if(codigo === "" || nombre === "" || fnaci === "") {
+                alert("Todos los campos son obligatorios");
+                return;
+            }
+
+            miPila.apilar({codigo, nombre, fnaci});
+            document.getElementById("frmApilar").reset();
+        }
+
+        function desapilarElemento() {
+            miPila.desapilar();
+        }
+    </script>
+</head>
+<body>
+    <h1>Pila JS con ventana aparte</h1>
+
+    <form id="frmApilar" onsubmit="apilarElemento(event)">
+        Codigo:<br/><input type="text" id="txtCodigo"><br/>
+        Nombre:<br/><input type="text" id="txtNombre"><br/>
+        F.Naci:<br/><input type="date" id="txtFNaci"><br/>
+        <input type="submit" value="Apilar">
+    </form>
+
+    <button onclick="desapilarElemento()">Desapilar</button>
+    <button onclick="miPila.mostrarTope()">Mostrar Tope</button>
+</body>
+</html>

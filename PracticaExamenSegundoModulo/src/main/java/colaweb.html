@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cola JS</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        class Cola {
+            constructor() {
+                this.items = [];
+            }
+
+            // Encolar un elemento
+            encolar(elemento) {
+                this.items.push(elemento);
+                this.mostrarVentana(); // mostrar en ventana
+            }
+
+            // Desencolar un elemento
+            desencolar() {
+                if(this.estaVacia()) {
+                    alert("La cola está vacía");
+                    return null;
+                }
+                const eliminado = this.items.shift();
+                this.mostrarVentana(); // actualizar ventana
+                return eliminado;
+            }
+
+            // Mostrar frente de la cola
+            mostrarFrente() {
+                if(this.estaVacia()) {
+                    alert("La cola está vacía");
+                    return null;
+                }
+                const frente = this.items[0];
+                alert(`Frente de la cola:\nCodigo: ${frente.codigo}\nNombre: ${frente.nombre}\nF.Naci: ${frente.fnaci}`);
+                return frente;
+            }
+
+            // Verificar si está vacía
+            estaVacia() {
+                return this.items.length === 0;
+            }
+
+            // Mostrar la cola en ventana aparte
+            mostrarVentana() {
+                if(!this.ventana || this.ventana.closed) {
+                    this.ventana = window.open("", "VentanaCola", "width=400,height=400");
+                    this.ventana.document.write("<h2>Cola de Elementos</h2><ul id='listaCola'></ul>");
+                }
+
+                const lista = this.ventana.document.getElementById("listaCola");
+                lista.innerHTML = ""; // limpiar lista
+                this.items.forEach((item, index) => {
+                    const li = this.ventana.document.createElement("li");
+                    li.textContent = `${index + 1}. Codigo: ${item.codigo}, Nombre: ${item.nombre}, F.Naci: ${item.fnaci}`;
+                    lista.appendChild(li);
+                });
+            }
+        }
+
+        const miCola = new Cola();
+
+        function encolarElemento(event) {
+            event.preventDefault();
+            const codigo = document.getElementById("txtCodigo").value;
+            const nombre = document.getElementById("txtNombre").value;
+            const fnaci = document.getElementById("txtFNaci").value;
+
+            if(codigo === "" || nombre === "" || fnaci === "") {
+                alert("Todos los campos son obligatorios");
+                return;
+            }
+
+            miCola.encolar({codigo, nombre, fnaci});
+            document.getElementById("frmEncolar").reset();
+        }
+
+        function desencolarElemento() {
+            miCola.desencolar();
+        }
+    </script>
+</head>
+<body>
+    <h1>Cola JS con ventana aparte</h1>
+
+    <form id="frmEncolar" onsubmit="encolarElemento(event)">
+        Codigo:<br/><input type="text" id="txtCodigo"><br/>
+        Nombre:<br/><input type="text" id="txtNombre"><br/>
+        F.Naci:<br/><input type="date" id="txtFNaci"><br/>
+        <input type="submit" value="Encolar">
+    </form>
+
+    <button onclick="desencolarElemento()">Desencolar</button>
+    <button onclick="miCola.mostrarFrente()">Mostrar Frente</button>
+</body>
+</html>
