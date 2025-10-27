@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista Circular Doble - Productos</title>
+</head>
+<body>
+
+  <h1>Lista Circular Doble - Productos</h1>
+
+  <form id="formProducto">
+    <label>Código:</label><br>
+    <input type="text" id="codigo" required><br><br>
+
+    <label>Nombre:</label><br>
+    <input type="text" id="nombre" required><br><br>
+
+
+    <button type="button" onclick="agregar()">Agregar</button>
+    <button type="button" onclick="deshacer()">Deshacer</button>
+  </form>
+
+  <br><br>
+
+
+
+
+ 
+  <h2>Lista</h2>
+  <table  id="tabla">
+    <thead>
+      <tr>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    class Docente{
+      constructor(codiDoce = "", nombDoce = "") {
+        this.codiDoce = codiDoce;
+        this.nombDoce = nombDoce;
+        
+      }
+    }
+
+    class Nodo {
+      constructor(docente) {
+        this.docente = docente;
+        this.sig = null;
+        this.ant = null;
+      }
+    }
+
+    class Pila {
+      constructor() {
+        this.inicio = null;
+      }
+
+
+
+      agregar(docente) {
+        let nuevo = new Nodo(docente);
+        if (!this.inicio) {
+          nuevo.sig = nuevo;
+          nuevo.ant = nuevo;
+          this.inicio = nuevo;
+        } else {
+          const ultimo = this.inicio.ant;
+          nuevo.sig = this.inicio;
+          nuevo.ant = ultimo;
+          ultimo.sig = nuevo;
+          this.inicio.ant = nuevo;
+        }
+      }
+
+
+
+      deshacer() {
+        if (!this.inicio) return;
+        let ultimo = this.inicio.ant;
+        if (this.inicio === ultimo) {
+          this.inicio = null;
+        } else {
+          let penultimo = ultimo.ant;
+          penultimo.sig = this.inicio;
+          this.inicio.ant = penultimo;
+        }
+      }
+
+      obtenerLista() {
+        let docentes = [];
+        if (!this.inicio) return docentes;
+        let aux = this.inicio;
+        do {
+          docentes.push(aux.docente);
+          aux = aux.sig;
+        } while (aux !== this.inicio);
+        return docentes;
+      }
+    }
+
+    let lista = new Pila();
+    let actual = null;
+
+    function obtenerDatos() {
+      let cod = document.getElementById("codigo").value;
+      let nom = document.getElementById("nombre").value;
+      return new Docente(cod, nom);
+    }
+
+    function mostrarNodo(nodo) {
+      if (!nodo) return;
+      document.getElementById("codigo").value = nodo.docente.codiDoce;
+      document.getElementById("nombre").value = nodo.docente.codiDoce;
+    }
+
+    function limpiarCampos() {
+      document.getElementById("formProducto").reset();
+    }
+
+    function actualizarTabla() {
+      let cuerpo = document.querySelector("#tabla tbody");
+      cuerpo.innerHTML = "";
+      let docentes = lista.obtenerLista();
+
+      docentes.forEach(f => {
+        let fila = `<tr>
+          <td>${f.codiDoce}</td>
+          <td>${f.nombDoce}</td>
+        </tr>`;
+        cuerpo.innerHTML += fila;
+      });
+    }
+
+
+    function agregar() {
+      let docente = obtenerDatos();
+      lista.agregar(docente);
+      if (!actual) actual = lista.inicio;
+      limpiarCampos();
+      actualizarTabla();
+    }
+
+
+    function deshacer() {
+      lista.deshacer();
+      actual = lista.inicio;
+      actualizarTabla();
+    }
+
+
+  </script>
+
+</body>
+</html>
