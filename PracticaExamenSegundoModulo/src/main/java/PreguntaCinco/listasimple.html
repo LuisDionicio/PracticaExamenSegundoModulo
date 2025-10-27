@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista Simple - Productos</title>
+</head>
+<body>
+
+  <h1>Lista Simple - Productos</h1>
+
+  <div>
+    <button onclick="inicio()">|<</button>
+    <button onclick="primero()"><</button>
+    <button onclick="final()">></button>
+    <button onclick="ultimo()">>|</button>
+  </div>
+
+  <br>
+
+  <form id="formProducto">
+    <label>Código:</label><br>
+    <input type="text" id="codigo" required><br><br>
+
+    <label>Nombre:</label><br>
+    <input type="text" id="nombre" required><br><br>
+
+    <label>Precio:</label><br>
+    <input type="text" id="precio" required><br><br>
+
+    <label>Stock:</label><br>
+    <input type="text" id="stock" required><br><br>
+
+    <button type="button" onclick="agregar()">Agregar</button>
+    <button type="button" onclick="eliminarPrimero()">Eliminar primero</button>
+  </form>
+
+  <h2>Lista de productos</h2>
+  <table border="1" id="tabla">
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Nombre</th>
+        <th>Precio</th>
+        <th>Stock</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    class Producto {
+      constructor(codiprod = "", nombprod = "", precprod = "", stocprod = "") {
+        this.codiprod = codiprod;
+        this.nombprod = nombprod;
+        this.precprod = precprod;
+        this.stocprod = stocprod;
+      }
+    }
+
+    class Nodo {
+      constructor(producto) {
+        this.producto = producto;
+        this.sig = null;
+      }
+    }
+
+    class ListaSimple {
+      constructor() {
+        this.inicio = null;
+      }
+
+      agregar(producto) {
+        const nuevo = new Nodo(producto);
+        if (!this.inicio) this.inicio = nuevo;
+        else {
+          let aux = this.inicio;
+          while (aux.sig) aux = aux.sig;
+          aux.sig = nuevo;
+        }
+      }
+
+      eliminarPrimero() {
+        if (this.inicio) this.inicio = this.inicio.sig;
+      }
+
+      obtenerLista() {
+        const productos = [];
+        let aux = this.inicio;
+        while (aux) {
+          productos.push(aux.producto);
+          aux = aux.sig;
+        }
+        return productos;
+      }
+    }
+
+    const lista = new ListaSimple();
+    let actual = null;
+
+    function obtenerDatos() {
+      const cod = document.getElementById("codigo").value;
+      const nom = document.getElementById("nombre").value;
+      const pre = document.getElementById("precio").value;
+      const sto = document.getElementById("stock").value;
+      return new Producto(cod, nom, pre, sto);
+    }
+
+    function mostrarNodo(nodo) {
+      if (!nodo) return;
+      document.getElementById("codigo").value = nodo.producto.codiprod;
+      document.getElementById("nombre").value = nodo.producto.nombprod;
+      document.getElementById("precio").value = nodo.producto.precprod;
+      document.getElementById("stock").value = nodo.producto.stocprod;
+    }
+
+    function actualizarTabla() {
+      const cuerpo = document.querySelector("#tabla tbody");
+      cuerpo.innerHTML = "";
+      lista.obtenerLista().forEach(p => {
+        cuerpo.innerHTML += `<tr>
+          <td>${p.codiprod}</td><td>${p.nombprod}</td><td>${p.precprod}</td><td>${p.stocprod}</td>
+        </tr>`;
+      });
+    }
+
+    function agregar() {
+      const producto = obtenerDatos();
+      lista.agregar(producto);
+      if (!actual) actual = lista.inicio;
+      document.getElementById("formProducto").reset();
+      actualizarTabla();
+    }
+
+    function eliminarPrimero() {
+      lista.eliminarPrimero();
+      actual = lista.inicio;
+      actualizarTabla();
+    }
+
+    function inicio() {
+      actual = lista.inicio;
+      mostrarNodo(actual);
+    }
+
+    function final() {
+      if (actual && actual.sig) {
+        actual = actual.sig;
+        mostrarNodo(actual);
+      }
+    }
+
+    function primero() {
+      // no retrocede en lista simple
+      alert("No se puede retroceder en una lista simple.");
+    }
+
+    function ultimo() {
+      let aux = lista.inicio;
+      while (aux && aux.sig) aux = aux.sig;
+      actual = aux;
+      mostrarNodo(actual);
+    }
+  </script>
+</body>
+</html>
