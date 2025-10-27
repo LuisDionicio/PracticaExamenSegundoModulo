@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Sistema de Personas</title>
+        <style>
+            body {
+                font-family: Arial;
+                margin: 20px;
+            }
+            input, select {
+                margin-bottom: 5px;
+            }
+            button {
+                margin: 3px;
+            }
+            pre {
+                background: #f2f2f2;
+                padding: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Gestión de Personas (JavaScript)</h1>
+
+        <form id="frmPersona" onsubmit="guardarPersona(event)">
+            <label>Código:</label><br/>
+            <input type="text" id="txtCodigo"><br/>
+
+            <label>Nombre:</label><br/>
+            <input type="text" id="txtNombre"><br/>
+
+            <label>Fecha de Nacimiento:</label><br/>
+            <input type="date" id="txtFNaci"><br/>
+
+            <label>Sexo:</label><br/>
+            <select id="txtSexo">
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+            </select><br/><br/>
+
+            <input type="submit" value="Guardar / Actualizar">
+            <button type="button" onclick="eliminarPersona()">Eliminar</button>
+        </form>
+
+        <hr>
+
+        <button onclick="irPrimero()"><|Primero</button>
+        <button onclick="irAnterior()">< Anterior</button>
+        <button onclick="irSiguiente()">Siguiente ></button>
+        <button onclick="irUltimo()"> Último |></button>
+
+        <hr>
+
+        <button onclick="mostrarListas()">Mostrar Listas Clasificadas</button>
+
+        <h2>Salida:</h2>
+        <pre id="salida"></pre>
+
+        <script>
+    // CLASES
+            class Persona {
+                constructor(codigo, nombre, sexo, fechaNacimiento) {
+                    this.codigo = codigo;
+                    this.nombre = nombre;
+                    this.sexo = sexo;
+                    this.fechaNacimiento = new Date(fechaNacimiento);
+                }
+
+                getEdad() {
+                    const hoy = new Date();
+                    let edad = hoy.getFullYear() - this.fechaNacimiento.getFullYear();
+                    const m = hoy.getMonth() - this.fechaNacimiento.getMonth();
+                    if (m < 0 || (m === 0 && hoy.getDate() < this.fechaNacimiento.getDate())) {
+                        edad--;
+                    }
+                    return edad;
+                }
+            }
+
+            class Listas {
+                constructor() {
+                    this.personas = [];
+                    this.posActual = -1;
+
+                    this.listaMenorEdadFemenino = [];
+                    this.listaMenorEdad = [];
+                    this.listaFemenino = [];
+                    this.listaGeneral = [];
+                }
+
+                agregar(p) {
+                    const idx = this.personas.findIndex(x => x.codigo === p.codigo);
+                    if (idx >= 0) {
+                        // Modificar
+                        this.personas[idx] = p;
+                        alert("✅ Persona modificada.");
+                    } else {
+                        // Agregar
+                        this.personas.push(p);
+                        alert("✅ Persona agregada.");
+                    }
+                    this.actualizarListas();
+                }
+
+                eliminar(codigo) {
+                    const idx = this.personas.findIndex(x => x.codigo === codigo);
+                    if (idx >= 0) {
+                        this.personas.splice(idx, 1);
+                        alert("🗑 Persona eliminada.");
+                        this.actualizarListas();
+                        return true;
+                    }
+                    alert("❌ Persona no encontrada.");
+                    return false;
+                }
+
+                actualizarListas() {
+                    this.listaMenorEdadFemenino = [];
+                    this.listaMenorEdad = [];
+                    this.listaFemenino = [];
+                    this.listaGeneral = [];
+
+                    this.personas.forEach(p => {
+                        const edad = p.getEdad();
+                        const sexo = p.sexo;
+
+                        if (edad < 18 && sexo === 'F') {
+                            this.listaMenorEdadFemenino.push(p);
+                        } else if (edad < 18) {
+                            this.listaMenorEdad.push(p);
+                        } else if (sexo === 'F') {
+                            this.listaFemenino.push(p);
+                        } else {
+                            this.listaGeneral.push(p);
+                        }
+                    });
+                }
+
+                // Métodos de navegación
+                primero() {
+                    if (this.personas.length === 0)
+                        return null;
+                    this.posActual = 0;
+                    return this.personas[0];
+                }
+
+                anterior() {
+                    if (this.posActual > 0)
+                        this.posActual--;
+                    return this.personas[this.posActual] || null;
+                }
+
+                siguiente() {
+                    if (this.posActual < this.personas.length - 1)
+                        this.posActual++;
+                    return this.personas[this.posActual] || null;
+                }
+
+                ultimo() {
+                    if (this.personas.length === 0)
+                        return null;
+                    this.posActual = this.personas.length - 1;
+                    return this.personas[this.posActual];
+                }
+
+                getActual() {
+                    return this.personas[this.posActual] || null;
+                }
+            }
+
+    // VARIABLES GLOBALES
+            const listas = new Listas();
+    // FUNCIONES DE INTERFAZ
+            function guardarPersona(event) {
+                event.preventDefault();
+
+                const codigo = document.getElementById("txtCodigo").value.trim();
+                const nombre = document.getElementById("txtNombre").value.trim();
+                const fecha = document.getElementById("txtFNaci").value;
+                const sexo = document.getElementById("txtSexo").value;
+
+                if (!codigo || !nombre || !fecha) {
+                    alert("⚠️ Por favor completa todos los campos.");
+                    return;
+                }
+
+                const persona = new Persona(codigo, nombre, sexo, fecha);
+                listas.agregar(persona);
+            }
+
+            function eliminarPersona() {
+                const codigo = document.getElementById("txtCodigo").value.trim();
+                if (!codigo) {
+                    alert("Ingresa un código para eliminar.");
+                    return;
+                }
+
+                if (listas.eliminar(codigo)) {
+                    limpiarFormulario();
+                }
+            }
+
+            function mostrarListas() {
+                const s = document.getElementById("salida");
+                s.textContent = `
+    Total personas: ${listas.personas.length}
+
+    Menor Edad Femenino: ${listas.listaMenorEdadFemenino.map(p => p.nombre).join(", ")}
+
+    Menor Edad: ${listas.listaMenorEdad.map(p => p.nombre).join(", ")}
+
+    Femenino: ${listas.listaFemenino.map(p => p.nombre).join(", ")}
+
+    General: ${listas.listaGeneral.map(p => p.nombre).join(", ")}
+    `;
+            }
+
+    // NAVEGACIÓN
+            function mostrarPersona(p) {
+                if (!p)
+                    return;
+                document.getElementById("txtCodigo").value = p.codigo;
+                document.getElementById("txtNombre").value = p.nombre;
+                document.getElementById("txtFNaci").value = p.fechaNacimiento.toISOString().split('T')[0];
+                document.getElementById("txtSexo").value = p.sexo;
+            }
+
+            function irPrimero() {
+                mostrarPersona(listas.primero());
+            }
+            function irAnterior() {
+                mostrarPersona(listas.anterior());
+            }
+            function irSiguiente() {
+                mostrarPersona(listas.siguiente());
+            }
+            function irUltimo() {
+                mostrarPersona(listas.ultimo());
+            }
+
+            function limpiarFormulario() {
+                document.getElementById("frmPersona").reset();
+            }
+        </script>
+    </body>
+</html>

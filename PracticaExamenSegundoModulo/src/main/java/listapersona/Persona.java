@@ -1,4 +1,4 @@
-package JavierRosquete;
+package listapersona;
 
 import java.time.LocalDate;
 
